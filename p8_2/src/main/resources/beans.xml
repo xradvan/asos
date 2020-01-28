@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+">
+    <bean id="service" class="asos.p8_2.MessageServiceMock"/>
+    <bean id="consumer" class="asos.p8_2.MessageConsumerMock" />
+    <bean id="processor" class="asos.p8_2.MessageProcessor">
+        <constructor-arg ref="service"/>
+        <constructor-arg ref="consumer"/>
+    </bean>
+    
+    <bean id="secbean" class="asos.p8_2.SecBean">
+        <property name="key" value="3"/>
+    </bean>
+    <aop:config>
+        <aop:aspect id="secaspect" ref="secbean">
+            <aop:pointcut id="encpc" expression="execution(* asos.p8_2.MessageServiceIfc.getMessage())"/>
+            <aop:pointcut id="decpc" expression="execution(* asos.p8_2.MessageConsumerIfc.putMessage(String)) and args(x)"/>
+            
+            <aop:around method="enc" pointcut-ref="encpc"/>
+            <aop:around method="dec" pointcut-ref="decpc"/>
+        </aop:aspect>
+        
+    </aop:config>
+</beans>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+">
+<bean id="service" class="asos.springdemo1.MessageServiceMock"/>
+    <bean id="consumer" class="asos.springdemo1.MessageConsumerMock"/>
+    
+    <bean id="processor" class="asos.springdemo1.MessageProcessor">
+        <constructor-arg ref="service"/>
+        <constructor-arg ref="consumer"/>
+    </bean>
+
+    <!-- Log -->
+    <bean id="logBean" class="asos.springdemo1.MyAspectBean"/>    
+    
+    <!-- Security -->
+    <bean id="securityBean" class="asos.springdemo1.SecurityBean"/>
+
+    <aop:config>  
+        <aop:aspect id="myaspect" ref="logBean" >  
+
+            <!-- Log -->  
+            <aop:pointcut id="pointCutBefore"   expression="execution(* asos.springdemo1.MessageProcessor.*(..))" />  
+            <aop:pointcut id="pointCutAfter"   expression="execution(* asos.springdemo1.MessageServiceIfc.*(..))" />  
+            
+            <aop:before method="log" pointcut-ref="pointCutBefore" />  
+            <aop:before method="callCount" pointcut-ref="pointCutBefore" />
+        </aop:aspect>  
+    </aop:config>  
+    
+     <!-- Security -->
+     <aop:config>  
+        <aop:aspect id="secAspect" ref="securityBean" >  
+            <aop:pointcut id="pcE"   expression="execution(* asos.springdemo1.MessageServiceMock.getMessage(..))" />  
+            <aop:pointcut id="pcD"   expression="execution(* asos.springdemo1.MessageConsumerMock.putMessage(String)) and args(x)" />  
+            
+            <aop:around method="enc" pointcut-ref="pcE" />
+            <aop:around method="dec" pointcut-ref="pcD" />
+        </aop:aspect>  
+    </aop:config>  
+    
+    
+</beans>

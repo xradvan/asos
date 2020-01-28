@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+">
+    <bean id="service" class="asos.cv8.MessageServiceMock"/>
+    <bean id="consumer" class="asos.cv8.MessageConsumerMock"/>
+    
+    <bean id="processor" class="asos.cv8.MessageProcessor">
+        
+        <constructor-arg ref="service"/>
+        <constructor-arg ref="consumer"/>
+    </bean>
+    
+
+    <bean id="logbean" class="asos.cv8.LogBean" />
+    <bean id="secbean" class="asos.cv8.SecBean">
+        <property name="key" value="3"/>
+    </bean>  
+    
+    <aop:config>
+        <aop:aspect id="aopaspect" ref="logbean">
+            <aop:pointcut id="logpc" expression="execution(* asos.cv8.MessageServiceIfc.getMessage())"/>
+            <aop:pointcut id="logpc2" expression="execution(* asos.cv8.MessageConsumerIfc.putMessage(..))"/>
+           
+            <aop:before method="log" pointcut-ref="logpc"/>
+            <aop:before method="log2" pointcut-ref="logpc2"/>
+            <aop:after-returning method="log3" pointcut-ref="logpc" returning="retVal"/>
+        </aop:aspect>
+        
+        <aop:aspect id="secaspect" ref="secbean">
+            <aop:pointcut id="getpc" expression="execution(* asos.cv8.MessageServiceIfc.getMessage())"/>
+            <aop:pointcut id="putpc" expression="execution(* asos.cv8.MessageConsumerIfc.putMessage(..)) and args(x)"/>
+            
+            <aop:around method="enc" pointcut-ref="getpc" />
+            <aop:around method="dec" pointcut-ref="putpc" />
+            
+        </aop:aspect>
+    </aop:config>
+</beans>

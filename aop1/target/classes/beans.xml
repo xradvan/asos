@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+">
+    <bean id="operation" class="asos.aop1.OperationMul"/>
+    <bean id="data" class="asos.aop1.DataMock" />
+    
+    <bean id="calculator" class="asos.aop1.Calculator"> 
+        <constructor-arg ref="data"/>
+        <constructor-arg ref="operation"/>
+    </bean> 
+    
+    <bean id="logger" class="asos.aop1.Logger" />
+    <aop:config>
+        <aop:aspect id="logging" ref="logger">
+            <aop:pointcut id="calculateLog" expression="execution(* asos.aop1.Calculator.compute())"/>
+            
+            <aop:after-returning pointcut-ref="calculateLog" method="log" returning="x"/>
+        </aop:aspect> 
+    </aop:config>
+    
+</beans>
